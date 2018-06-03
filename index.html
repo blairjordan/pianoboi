@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>pianoboi</title>
+    <style>
+    
+body {
+  background-color: hsl(24, 10%, 90%);
+  margin: 4rem;
+  font-color: rgba(0,0,0,0.9);
+  font-size: 0;
+  line-height: .5;
+  text-align: center;
+}
+h1 { 
+  font-size: 4rem;
+  font-family: Playfair Display; 
+  font-weight: 100;
+  line-height: 1.2;
+  margin-bottom: 4rem;
+}
+div.sheetmusic { 
+  display: inline-block;
+  text-align: initial;
+}
+section.staff {
+  clear: both;
+}
+section.bar {
+  float: left;
+  height: 4.1rem;
+  background-image: linear-gradient(hsla(210, 50%, 30%, .5) 1px, transparent 1px);
+  background-size: 100% 1rem;
+  background-origin: content-box;
+  font-size: 10rem;
+  width: 40rem;
+  border-left: 2px solid #000;
+  border-right: 2px solid #000;
+  margin-bottom: 4rem;
+}
+section.bar:first-child {
+  border-left: 4px solid #000;
+}
+section.bar:last-child {
+  border-right: 4px solid #000;
+}
+.g-clef { 
+  font-size: 10rem;
+  padding-right: 0;
+  margin-right: -4rem;
+}
+span.note { 
+  font-size: 5rem; 
+  margin-right: -3rem;
+  display: inline-block;
+  position: relative;
+}
+span.eighth { margin-left: 2rem;}
+
+.f-clef {
+  font-size: 5rem;
+  position: relative;
+  top: -2rem;
+}
+
+@media all and (max-width: 800px) {
+  h1 { 
+  font-size: 3rem;
+  }
+  section.bar { 
+    float: none; 
+  }
+}
+  </style>
+  </head>
+  <body>
+    <script>window.$ = window.jQuery = require('jquery');</script>
+    <script>
+      // You can also require other files to run in this process
+      require('./renderer.js')
+    </script>
+
+  <div class="sheetmusic">
+    <section class="staff">
+        <section id="live" class="bar">
+          <span class="g-clef">&#119070;</span>
+          
+          <span class="note" style="bottom: 0rem;">&#9833;</span>
+        </section>
+      </section>
+    </section>
+  </div>
+  </body>
+
+
+</html>
