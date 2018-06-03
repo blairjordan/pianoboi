@@ -29,13 +29,17 @@ input.on('message', function(deltaTime, message) {
 
     //message[1]);
 
+    const keyPressMessage = 144;
+    const middleC = 60;
+    
+    let messageType = message[0];
     let keyNo = message[1];
-    let middleC = 60;
+    let velocity = message[2];
 
     let k = (keyNo - middleC) * 0.35;
 
        // Key press
-       if (message[2] > 0) {
+       if (velocity > 0 && messageType == keyPressMessage) {
         $('#live').append(
             '<span class="note" style="bottom: '+k+'rem;">&#9833;</span>');
            
