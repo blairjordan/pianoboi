@@ -29,6 +29,8 @@ input.on('message', function(deltaTime, message) {
 
     //message[1]);
 
+    // http://www.somascape.org/midi/basic/notes.html
+
     const keyPressMessage = 144;
     const middleC = 60;
     
@@ -36,13 +38,38 @@ input.on('message', function(deltaTime, message) {
     let keyNo = message[1];
     let velocity = message[2];
 
-    let k = (keyNo - middleC) * 0.35;
+    //let k = (keyNo - middleC) * 0.35;
 
+    const keys = [
+      { 'id': 60, 'name' : 'c3' },
+      { 'id' : 62, 'name' : 'd3' },
+      { 'id' : 64, 'name' : 'e3' },
+      { 'id' : 65, 'name' : 'f3' },
+      { 'id' : 67, 'name' : 'g3' },
+      { 'id' : 69, 'name' : 'a3' },
+      { 'id' : 71, 'name' : 'b3' },
+      { 'id' : 72, 'name' : 'c4' },
+      { 'id' : 74, 'name' : 'd4' },
+      { 'id' : 76, 'name' : 'e4' },
+      { 'id' : 77, 'name' : 'f4' },
+      { 'id' : 79, 'name' : 'g4' },
+    ];
+
+    let key = keys.find((k) => {
+      return k.id == keyNo;
+    });
+    
        // Key press
-       if (velocity > 0 && messageType == keyPressMessage) {
+       if (velocity > 0 
+        && messageType == keyPressMessage
+        && typeof key !== 'undefined') {
+
         $('#live').append(
-            '<span class="note" style="bottom: '+k+'rem;">&#9833;</span>');
-           
+              `<span class="note ${key.name}">&#9833;</span>`);
+            
+       } else {
+         // remove to keep notes
+        $('#live').empty();
        }
 });
 
