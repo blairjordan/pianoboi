@@ -51,20 +51,26 @@ section.bar:last-child {
   margin-right: -4rem;
 }
 span.note { 
-  font-size: 5rem; 
+  font-size: 4rem; 
   margin-right: -3rem;
+  position: absolute;
+  margin-bottom: 0.41rem;
+}
+span.notecontainer {
   display: inline-block;
   position: relative;
 }
 span.eighth { margin-left: 2rem;}
-
+.live {
+  margin: 0 0 0 2rem;
+}
 .f-clef {
   font-size: 5rem;
   position: relative;
   top: -2rem;
 }
 .c3 {
-  bottom: 0rem;
+  bottom: 0.5rem;
 }
 .d3 {
   bottom: 1rem;
@@ -119,8 +125,9 @@ span.eighth { margin-left: 2rem;}
 
   <div class="sheetmusic">
     <section class="staff">
-        <section id="live" class="bar">
+        <section class="bar">
           <span class="g-clef">&#119070;</span>
+          <span class="live"></span>
         </section>
       </section>
     </section>
