@@ -3,118 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <title>pianoboi</title>
-    <style>
-    
-body {
-  background-color: hsl(24, 10%, 90%);
-  margin: 4rem;
-  font-color: rgba(0,0,0,0.9);
-  font-size: 0;
-  line-height: .5;
-  text-align: center;
-}
-h1 { 
-  font-size: 4rem;
-  font-family: Playfair Display; 
-  font-weight: 100;
-  line-height: 1.2;
-  margin-bottom: 4rem;
-}
-div.sheetmusic { 
-  display: inline-block;
-  text-align: initial;
-}
-section.staff {
-  clear: both;
-}
-section.bar {
-  float: left;
-  height: 4.1rem;
-  background-image: linear-gradient(hsla(210, 50%, 30%, .5) 1px, transparent 1px);
-  background-size: 100% 1rem;
-  background-origin: content-box;
-  font-size: 10rem;
-  width: 40rem;
-  border-left: 2px solid #000;
-  border-right: 2px solid #000;
-  margin-bottom: 4rem;
-}
-section.bar:first-child {
-  border-left: 4px solid #000;
-}
-section.bar:last-child {
-  border-right: 4px solid #000;
-}
-.g-clef { 
-  font-size: 10rem;
-  padding-right: 0;
-  margin-right: -4rem;
-}
-span.note { 
-  font-size: 4rem; 
-  margin-right: -3rem;
-  position: absolute;
-  margin-bottom: 0.41rem;
-}
-span.notecontainer {
-  display: inline-block;
-  position: relative;
-}
-span.eighth { margin-left: 2rem;}
-.live {
-  margin: 0 0 0 2rem;
-}
-.f-clef {
-  font-size: 5rem;
-  position: relative;
-  top: -2rem;
-}
-.c3 {
-  bottom: 0.5rem;
-}
-.d3 {
-  bottom: 1rem;
-}
-.e3 {
-  bottom: 1.5rem;
-}
-.f3 {
-  bottom: 2rem;
-}
-.g3 {
-  bottom: 2.5rem;
-}
-.a3 {
-  bottom: 3rem;
-}
-.b3 {
-  bottom: 3.5rem;
-}
-.c4 {
-  bottom: 4rem;
-}
-.d4 {
-  bottom: 4.5rem;
-}
-.e4 {
-  bottom: 5rem;
-}
-.f4 {
-  bottom: 5.5rem;
-}
-.g4 {
-  bottom: 6rem;
-}
-
-@media all and (max-width: 800px) {
-  h1 { 
-  font-size: 3rem;
-  }
-  section.bar { 
-    float: none; 
-  }
-}
-  </style>
+  <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
     <script>window.$ = window.jQuery = require('jquery');</script>
@@ -127,8 +16,14 @@ span.eighth { margin-left: 2rem;}
     <section class="staff">
         <section class="bar">
           <span class="g-clef">&#119070;</span>
-          <span class="live"></span>
+          <span class="live-g"></span>
         </section>
+      </section>
+    </section>
+    <section class="staff">
+      <section class="bar">
+        <span class="f-clef">&#119074;</span>
+        <span class="live-f"></span>
       </section>
     </section>
   </div>
