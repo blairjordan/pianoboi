@@ -62,6 +62,16 @@ span.note {
   position: absolute;
   margin-bottom: 0.41rem;
 }
+span.sharp {
+  font-size: 1.4rem;
+  margin-left: -0.1rem;
+  position: absolute;
+}
+span.flat {
+  font-size: 1.4rem;
+  margin-left: -0.4rem;
+  position: absolute;
+}
 span.notecontainer {
   display: inline-block;
   position: relative;
