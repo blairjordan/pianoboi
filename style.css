@@ -97,19 +97,19 @@ span.eighth { margin-left: 2rem;}
 .g3, .b1 {
   bottom: 2.5rem;
 }
-.a3, .c1 {
+.a3, .c2 {
   bottom: 3rem;
 }
-.b3, .d1 {
+.b3, .d2 {
   bottom: 3.5rem;
 }
-.c4, .e1 {
+.c4, .e2 {
   bottom: 4rem;
 }
-.d4, .f1 {
+.d4, .f2 {
   bottom: 4.5rem;
 }
-.e4, .g1 {
+.e4, .g2 {
   bottom: 5rem;
 }
 .f4, .a2 {
@@ -121,7 +121,9 @@ span.eighth { margin-left: 2rem;}
 .a4 {
   bottom: 6.5rem;
 }
-.ledger {
+
+/* Ledger lines */
+.through {
   border-bottom: 3px solid #000;
   width: 2rem;
   position: absolute;
@@ -135,4 +137,8 @@ span.eighth { margin-left: 2rem;}
   section.bar { 
     float: none; 
   }
+}
+
+#signature {
+  margin-bottom: 3rem;
 }

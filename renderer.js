@@ -1,7 +1,7 @@
 var {ipcRenderer, remote} = require('electron');  
 var main = remote.require("./main.js");
 var midi = require('midi');
-const keys = require('./keys.js');
+const { keys, signatures } = require('./keys.js');
 const symbols = require('./symbols.js');
 window.$ = window.jQuery = require('jquery');
 
@@ -13,16 +13,18 @@ var portCount = input.getPortCount();
 
 console.log(`devices available: ${portCount}`);
 
-// Get the name of a specified input port.
-input.getPortName(0);
+// On load
+$(function() {
+  signatures.forEach(s => {
+    $('#signature').append(`<option value="${s.id}">${s.key}</option>`);
+  });
+});
+
+input.getPortName(0); // Temp - Just look at first port for now
 
 let pressedKeys = [];
 
-const findKey = keyNo => {
-  return keys.find((k) => {
-    return k.id === keyNo;
-  });
-}
+const findKey = keyNo => keys.find(k => k.id === keyNo);
 
 input.on('message', function(deltaTime, message) {
     // The message is an array of numbers corresponding to the MIDI bytes:
