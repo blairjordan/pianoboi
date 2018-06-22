@@ -16,7 +16,7 @@ console.log(`devices available: ${portCount}`);
 // On load
 $(function() {
   signatures.forEach(s => {
-    $('#signature').append(`<option value="${s.id}">${s.key}</option>`);
+    $('#signature').append(`<option value="${s.id}">${s.major} major / ${s.minor} minor</option>`);
   });
 });
 

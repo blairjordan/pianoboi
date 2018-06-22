@@ -49,19 +49,21 @@ const keys = [
 
 const signatures = 
 [
-  { id: 'CM',  key: 'C major', sharps: [], flats: [] },
-  { id: 'GM',  key: 'G major', sharps: [ 'f' ], flats: [] },
-  { id: 'DM',  key: 'D major', sharps: [ 'f', 'c' ], flats: [] },
-  { id: 'AM',  key: 'A major', sharps: [ 'f', 'c', 'g' ], flats: [] },
-  { id: 'EM',  key: 'E major', sharps: [ 'f', 'c', 'g', 'd' ], flats: [] },
-  { id: 'BM',  key: 'B major', sharps: [ 'f', 'c', 'g', 'd', 'a' ], flats: [] },
-  { id: 'FM',  key: 'F major', sharps: [], flats: [ 'b' ] },
-  { id: 'Gm',  key: 'G minor', sharps: [], flats: [ 'b', 'e' ] },
-  { id: 'Cm',  key: 'C minor', sharps: [], flats: [ 'b', 'e', 'a' ] },
-  { id: 'Fm',  key: 'F minor', sharps: [], flats: [ 'b', 'e', 'a', 'd' ] },
-  { id: 'DfM', key: 'D-flat major', sharps: [], flats: [ 'b', 'e', 'a', 'd', 'g' ] },
-  { id: 'GfM', key: 'G-flat major', sharps: [], flats: [ 'b', 'e', 'a', 'd', 'g', 'c' ] },
-  { id: 'CfM', key: 'C-flat major', sharps: [], flats: [ 'b', 'e', 'a', 'd', 'g', 'c', 'f' ] },
+  { id: 'CM',  major: 'C',        minor: 'A',       sharps: [], flats: [] },
+  { id: 'GM',  major: 'G',        minor: 'E',       sharps: [ 'f' ], flats: [] },
+  { id: 'DM',  major: 'D',        minor: 'B',       sharps: [ 'f', 'c' ], flats: [] },
+  { id: 'AM',  major: 'A',        minor: 'F-sharp', sharps: [ 'f', 'c', 'g' ], flats: [] },
+  { id: 'EM',  major: 'E',        minor: 'C-sharp', sharps: [ 'f', 'c', 'g', 'd' ], flats: [] },
+  { id: 'BM',  major: 'B',        minor: 'G-sharp', sharps: [ 'f', 'c', 'g', 'd', 'a' ], flats: [] },
+  { id: 'FsM', major: 'F-sharp',  minor: 'D-sharp', sharps: [ 'f', 'c', 'g', 'd', 'a', 'e' ], flats: [] },
+  { id: 'CsM', major: 'C-sharp',  minor: 'A-sharp', sharps: [ 'f', 'c', 'g', 'd', 'a', 'e', 'b' ], flats: [] },
+  { id: 'FM',  major: 'F',        minor: 'D',       sharps: [], flats: [ 'b' ] },
+  { id: 'BfM', major: 'B-flat',   minor: 'G',       sharps: [], flats: [ 'b', 'e' ] },
+  { id: 'EfM', major: 'E-flat',   minor: 'C',       sharps: [], flats: [ 'b', 'e', 'a' ] },
+  { id: 'AfM', major: 'A-flat',   minor: 'F',       sharps: [], flats: [ 'b', 'e', 'a', 'd' ] },
+  { id: 'DfM', major: 'D-flat',   minor: 'B-flat',  sharps: [], flats: [ 'b', 'e', 'a', 'd', 'g' ] },
+  { id: 'GfM', major: 'G-flat',   minor: 'E-flat',  sharps: [], flats: [ 'b', 'e', 'a', 'd', 'g', 'c' ] },
+  { id: 'CfM', major: 'C-flat',   minor: 'A-flat',  sharps: [], flats: [ 'b', 'e', 'a', 'd', 'g', 'c', 'f' ] },
 ];
 
 module.exports = { keys, signatures };
