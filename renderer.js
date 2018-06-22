@@ -1,7 +1,7 @@
 var {ipcRenderer, remote} = require('electron');  
 var main = remote.require("./main.js");
 var midi = require('midi');
-const { keys, signatures } = require('./keys.js');
+const { keys, signatures, g } = require('./keys.js');
 const symbols = require('./symbols.js');
 window.$ = window.jQuery = require('jquery');
 
@@ -13,10 +13,27 @@ var portCount = input.getPortCount();
 
 console.log(`devices available: ${portCount}`);
 
+const findKey = keyNo => keys.find(k => k.id === keyNo);
+
 // On load
 $(function() {
+  const findSignature = id => signatures.find(s => s.id === id);
   signatures.forEach(s => {
     $('#signature').append(`<option value="${s.id}">${s.major} major / ${s.minor} minor</option>`);
+  });
+
+  $('#signature').on('change', function () {
+    let signature = findSignature($('#signature').val());
+
+    let keyG = $('.key-g');
+    keyG.empty();
+
+    signature.sharps.forEach((s,i) => {
+      keyG.append(`
+      <span class="notecontainer">
+        <span class="sharp ${s}${g[i]}">&#x266f;</span>
+      </span>`);
+    });
   });
 });
 
@@ -24,7 +41,6 @@ input.getPortName(0); // Temp - Just look at first port for now
 
 let pressedKeys = [];
 
-const findKey = keyNo => keys.find(k => k.id === keyNo);
 
 input.on('message', function(deltaTime, message) {
     // The message is an array of numbers corresponding to the MIDI bytes:
@@ -71,10 +87,10 @@ input.on('message', function(deltaTime, message) {
         `<span class="note ${keyFound.name}">&#9833;</span>`
       );
       
-      symbols.forEach((s) => {
-        if (keyFound[s.id]) {
+      symbols.forEach(s => {
+        if (keyFound[s.name]) {
           $( live ).children('.notecontainer').append(
-            `<span class="${s.id} ${keyFound.name}">${s.symbol}</span>`
+            `<span class="${s.name} ${keyFound.name}">${s.symbol}</span>`
           );
         }
       });

@@ -1,7 +1,7 @@
 const symbols = [
-  { id: 'flat',       symbol: '&#x266d;'},
-  { id: 'sharp',      symbol: '&#x266f;'},
-  { id: 'through',    symbol: ''},
+  { name: 'flat',       symbol: '&#x266d;'},
+  { name: 'sharp',      symbol: '&#x266f;'},
+  { name: 'through',    symbol: ''},
 ];
 
 module.exports = symbols;

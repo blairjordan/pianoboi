@@ -47,6 +47,8 @@ const keys = [
   { id : 81, name : 'a4', key: 'a', octave: 4, sharp: false, flat: false, through:true,  under:false, over:false,  bass: false },
 ];
 
+g = [ 4, 4, 4, 4, 3, 4, 3 ];
+
 const signatures = 
 [
   { id: 'CM',  major: 'C',        minor: 'A',       sharps: [], flats: [] },
@@ -54,7 +56,7 @@ const signatures =
   { id: 'DM',  major: 'D',        minor: 'B',       sharps: [ 'f', 'c' ], flats: [] },
   { id: 'AM',  major: 'A',        minor: 'F-sharp', sharps: [ 'f', 'c', 'g' ], flats: [] },
   { id: 'EM',  major: 'E',        minor: 'C-sharp', sharps: [ 'f', 'c', 'g', 'd' ], flats: [] },
-  { id: 'BM',  major: 'B',        minor: 'G-sharp', sharps: [ 'f', 'c', 'g', 'd', 'a' ], flats: [] },
+  { id: 'BM',  major: 'B',        minor: 'G-sharp', sharps: [ 'f', 'c', 'g', 'd', 'a' ], flats: [] , },
   { id: 'FsM', major: 'F-sharp',  minor: 'D-sharp', sharps: [ 'f', 'c', 'g', 'd', 'a', 'e' ], flats: [] },
   { id: 'CsM', major: 'C-sharp',  minor: 'A-sharp', sharps: [ 'f', 'c', 'g', 'd', 'a', 'e', 'b' ], flats: [] },
   { id: 'FM',  major: 'F',        minor: 'D',       sharps: [], flats: [ 'b' ] },
@@ -66,4 +68,4 @@ const signatures =
   { id: 'CfM', major: 'C-flat',   minor: 'A-flat',  sharps: [], flats: [ 'b', 'e', 'a', 'd', 'g', 'c', 'f' ] },
 ];
 
-module.exports = { keys, signatures };
+module.exports = { keys, signatures, g };
