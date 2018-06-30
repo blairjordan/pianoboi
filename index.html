@@ -2,7 +2,8 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>pianoboi</title>
+    <title>pianoboi</title>  
+    <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
     <script>window.$ = window.jQuery = require('jquery');</script>
@@ -13,6 +14,34 @@
 
   <div class="config">
     <select id="signature"></select>
+  </div>
+
+  <div class="key">
+    <table>
+      <thead>
+        <tr>
+          <th>Chord</th>
+          <th>I</th>
+          <th>II</th>
+          <th>III</th>
+          <th>IV</th>
+          <th>V</th>
+          <th>VI</th>
+          <th>VII</th>
+        </tr>
+      </thead>
+      <tr class="majorchords">
+      </tr>
+      <tr class="minorchords">
+      </tr>
+    </table>
+  </div>
+
+  <div class="config">
+    <select id="clef">
+        <option value="treble">Treble (G clef)</option>
+        <option value="bass">Bass (F clef)</option>
+    </select>
   </div>
 
   <div id="sheetmusic" />

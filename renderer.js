@@ -1,80 +1,31 @@
-var {ipcRenderer, remote} = require('electron');  
-var main = remote.require("./main.js");
-var midi = require('midi');
-const symbols = require('./symbols.js');
+let {ipcRenderer, remote} = require('electron');  
+let main = remote.require("./main.js");
+const midi = require('midi');
+const { signatures } = require('./signatures.js');
 window.$ = window.jQuery = require('jquery');
-const { Note, Interval, Distance, Scale, Chord } = require('tonal');
+const { Note, Array } = require('tonal');
+const Key = require("tonal-key")
 const Vex = require('vexflow');
 
-let VF, renderer, context;
 
 $(function() {
-  VF = Vex.Flow;
-  
-  renderer = new VF.Renderer(document.getElementById("sheetmusic"), VF.Renderer.Backends.SVG);
-  
-  renderer.resize(800, 500);
-  context = renderer.getContext();
+
+  const VF = Vex.Flow;
+  const renderer = new VF.Renderer(document.getElementById("sheetmusic"), VF.Renderer.Backends.SVG);
+  const context = renderer.getContext();
+  let signature = 'C';
+  let clef = 'treble';
+
+  renderer.resize(800, 600);
   
   const findSignature = id => signatures.find(s => s.id === id);
-  signatures.forEach(s => {
-    $('#signature').append(`<option value="${s.id}">${s.major} major / ${s.minor} minor</option>`);
-  });
 
-  $('#signature').on('change', function () {
-    console.log('changed signature to something');
-  });
-});
-
-// Set up a new input.
-var input = new midi.input();
-
-// Count the available input ports.
-var portCount = input.getPortCount();
-
-console.log(`devices available: ${portCount}`);
-
-input.getPortName(0); // Temp - Just look at first port for now
-
-const hasAccidental = (k,a) => (k.substring(1,2) == a);
-
-let keysPressed = [];
-
-input.on('message', function(deltaTime, message) {
-
-    const keyEventMessage = 144;
-    
-    let messageType = message[0];
-    let keyNo = message[1];
-    let velocity = message[2];
-
-    let currentKey = Note.fromMidi(keyNo);
-
-    // Key event for a defined key
-    if (messageType == keyEventMessage
-      && typeof currentKey !== 'undefined') {
-
-      if (velocity > 0) { 
-        if ( !( currentKey in keysPressed ) ) {
-          // Add
-          keysPressed.push(currentKey);
-        }
-      } else {
-        // Remove
-        keysPressed.splice( keysPressed.indexOf(currentKey), 1 );
-      } 
-    }
-    
-    console.log(keysPressed);
+  renderStave = ({ clef, keys, signature }) => {
 
     // Create a stave of width 400 at position 10, 40 on the canvas.
-    let stave = new VF.Stave(10, 40, 400);
-    stave.addClef("treble").addTimeSignature("4/4");
-    
-    let stave2 = new VF.Stave(10, 150, 400);
-    stave2.addClef("bass").addTimeSignature("4/4");
-
-    keys = keysPressed.map(k => `${k.substring(0,k.search(/\d/)).toLowerCase()}/${k.substring(k.search(/\d/),k.length)}`);
+    let stave = new VF.Stave(10, 40, 550);
+    stave.addClef(clef).addTimeSignature("4/4");
+    stave.addKeySignature(signature.id);
 
     var notes = [
       new VF.StaveNote({ keys: ["b/4"], duration: "qr" }),
@@ -88,7 +39,7 @@ input.on('message', function(deltaTime, message) {
     }
     
     let accidentals = keys.map(k => hasAccidental(k,'b'));
-    
+
     keys.forEach((k,i) => {
       if (accidentals[i]) {
         note.addAccidental(i, new Vex.Flow.Accidental('b'));
@@ -100,19 +51,96 @@ input.on('message', function(deltaTime, message) {
     var voice = new VF.Voice({num_beats: 4,  beat_value: 4});
     voice.addTickables(notes);
     
-    // Format and justify the notes to 400 pixels.
     var formatter = new VF.Formatter().joinVoices([voice]).format([voice], 400);
 
     context.clear();
     stave.setContext(context).draw();
-    stave2.setContext(context).draw();
 
-    // Render voice
     voice.draw(context, stave);
+  }
+
+  const updateKeySignature = () => {
+    signature = findSignature($('#signature').val());
+    let major = Key.chords(`${signature.major} major`);
+    let minor = Key.chords(`${signature.minor} minor`);
+
+    $('.majorchords').html('<th>Major</th>');
+    major.forEach(c => {
+      $('.majorchords').append(`<td>${c}</td>`);
+    });
+
+    $('.minorchords').html('<th>Minor</th>');
+    minor.forEach(c => {
+      $('.minorchords').append(`<td>${c}</td>`);
+    });
+
+    renderStave({ clef, keys: [], signature });
+  }
+  
+  signatures.forEach(s => {
+    $('#signature').append(`<option value="${s.id}">${s.major} major / ${s.minor} minor</option>`);
+  });
+
+  $('#signature').on('change', function () {  
+    updateKeySignature();    
+  });
+
+  $('#clef').on('change', function () {  
+    clef = $('#clef').val();
+    renderStave({ clef, keys: [], signature });
+  });
+
+  updateKeySignature();
+
+  // Set up a new input.
+  var input = new midi.input();
+
+  // Count the available input ports.
+  var portCount = input.getPortCount();
+
+  console.log(`devices available: ${portCount}`);
+
+  input.getPortName(0); // Temp - Just look at first port for now
+
+  const hasAccidental = (k,a) => (k.substring(1,2) == a);
+
+  let keys = [];
+  input.on('message', function(deltaTime, message) {
+
+      const keyEventMessage = 144;
+      
+      let messageType = message[0];
+      let keyNo = message[1];
+      let velocity = message[2];
+
+      let currentKey = Note.fromMidi(keyNo);
+
+      // Key event for a defined key
+      if (messageType == keyEventMessage
+        && typeof currentKey !== 'undefined') {
+
+        if (velocity > 0) { 
+          if ( !( currentKey in keys ) ) {
+            // Add
+            keys.push(currentKey);
+          }
+        } else {
+          // Remove
+          keys.splice( keys.indexOf(currentKey), 1 );
+        } 
+      }
+      
+    renderStave({
+      clef, 
+      keys: (Array.sort(keys)).map(k => `${k.substring(0,k.search(/\d/)).toLowerCase()}/${k.substring(k.search(/\d/),k.length)}`),
+      signature
+    });
+  });
+
+  // Open the first available input port.
+  input.openPort(0);
+
+  // Sysex, timing, and active sensing messages are ignored
+  input.ignoreTypes(false, false, false);
+
 });
-
-// Open the first available input port.
-input.openPort(0);
-
-// Sysex, timing, and active sensing messages are ignored
-input.ignoreTypes(false, false, false);
