@@ -77,8 +77,16 @@ $(function() {
     renderStave({ clef, keys: [], signature });
   }
   
+  // Describes number of flats/ sharps in a given key signature
+  accidentalText = (s, t) => {
+    let count =  s[`${t}s`];
+    if (count=== 0)
+      return '';
+    return `(${count} ${t}${(count > 1) ? 's' : ''})`;
+  }
+
   signatures.forEach(s => {
-    $('#signature').append(`<option value="${s.id}">${s.major} major / ${s.minor} minor</option>`);
+    $('#signature').append(`<option value="${s.id}">${s.major} major / ${s.minor} minor ${accidentalText(s, 'sharp') || accidentalText(s, 'flat') }</option>`);
   });
 
   $('#signature').on('change', function () {  
