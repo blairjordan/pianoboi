@@ -3,22 +3,35 @@ let main = remote.require("./main.js");
 const midi = require('midi');
 const { signatures } = require('./signatures.js');
 window.$ = window.jQuery = require('jquery');
-const { Note, Array } = require('tonal');
+const { Note, Array, Chord } = require('tonal');
 const Key = require("tonal-key")
 const Vex = require('vexflow');
-
 
 $(function() {
 
   const VF = Vex.Flow;
   const renderer = new VF.Renderer(document.getElementById("sheetmusic"), VF.Renderer.Backends.SVG);
   const context = renderer.getContext();
+
   let signature = 'C';
   let clef = 'treble';
+  let majorChords, minorChords;
 
   renderer.resize(800, 600);
   
   const findSignature = id => signatures.find(s => s.id === id);
+
+  chordsEqual = (a, b) => {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+    a.sort();
+    b.sort();
+    for (var i = 0; i < a.length; ++i) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  }
 
   renderStave = ({ clef, keys, signature }) => {
 
@@ -60,17 +73,17 @@ $(function() {
   }
 
   const updateKeySignature = () => {
-    signature = findSignature($('#signature').val());
-    let major = Key.chords(`${signature.major} major`);
-    let minor = Key.chords(`${signature.minor} minor`);
+    signature = findSignature($('#signature').val()); // TODO: use tonal Key.props
+    majorChords = Key.chords(`${signature.major} major`);
+    minorChords = Key.chords(`${signature.minor} minor`);
 
     $('.majorchords').html('<th>Major</th>');
-    major.forEach(c => {
+    majorChords.forEach(c => {
       $('.majorchords').append(`<td>${c}</td>`);
     });
 
     $('.minorchords').html('<th>Minor</th>');
-    minor.forEach(c => {
+    minorChords.forEach(c => {
       $('.minorchords').append(`<td>${c}</td>`);
     });
 
@@ -80,8 +93,7 @@ $(function() {
   // Describes number of flats/ sharps in a given key signature
   accidentalText = (s, t) => {
     let count =  s[`${t}s`];
-    if (count=== 0)
-      return '';
+    if (count=== 0) return '';
     return `(${count} ${t}${(count > 1) ? 's' : ''})`;
   }
 
@@ -137,6 +149,15 @@ $(function() {
           keys.splice( keys.indexOf(currentKey), 1 );
         } 
       }
+
+      $('#chordname').empty();
+      majorChords.forEach(c => {
+        let chordNotes = Chord.notes(c);
+        if (chordsEqual(chordNotes, keys.map(k => k.substring(0, k.length - 1)))) {
+          $('#chordname').html(c);
+        }
+      })
+      
       
     renderStave({
       clef, 
