@@ -26,3 +26,7 @@ td, th {
   padding: 1.2rem 1.5rem;
   text-align: left;
 }
+.highlight {
+  background: rgb(0, 61, 141);
+  color: white;
+}

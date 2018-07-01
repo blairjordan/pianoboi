@@ -79,12 +79,12 @@ $(function() {
 
     $('.majorchords').html('<th>Major</th>');
     majorChords.forEach(c => {
-      $('.majorchords').append(`<td>${c}</td>`);
+      $('.majorchords').append(`<td class="chord ${c}">${c}</td>`);
     });
 
     $('.minorchords').html('<th>Minor</th>');
     minorChords.forEach(c => {
-      $('.minorchords').append(`<td>${c}</td>`);
+      $('.minorchords').append(`<td class="chord ${c}">${c}</td>`);
     });
 
     renderStave({ clef, keys: [], signature });
@@ -150,14 +150,20 @@ $(function() {
         } 
       }
 
-      $('#chordname').empty();
+      $('.chord').removeClass('highlight');
       majorChords.forEach(c => {
         let chordNotes = Chord.notes(c);
         if (chordsEqual(chordNotes, keys.map(k => k.substring(0, k.length - 1)))) {
-          $('#chordname').html(c);
+          $(`.chord.${c}`).addClass('highlight');
         }
-      })
-      
+      });
+
+      minorChords.forEach(c => {
+        let chordNotes = Chord.notes(c);
+        if (chordsEqual(chordNotes, keys.map(k => k.substring(0, k.length - 1)))) {
+          $(`.chord.${c}`).addClass('highlight');
+        }
+      });
       
     renderStave({
       clef, 
