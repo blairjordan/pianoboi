@@ -149,6 +149,8 @@ $(function() {
     let keyNo = message[1];
     let velocity = message[2];
 
+    // TODO: Set second param to true for sharps.
+    // https://github.com/danigb/tonal/blob/master/docs/API.md#notefrommidimidi-boolean--string
     let currentKey = Note.fromMidi(keyNo);
 
     // Key event for a defined key
