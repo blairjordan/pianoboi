@@ -20,6 +20,7 @@ $(function() {
   renderer.resize(800, 600);
   
   const findSignature = id => signatures.find(s => s.id === id);
+  const capitalize = ([first,...rest]) => first.toUpperCase() + rest.join('').toLowerCase();
 
   const chordsEqual = (a, b) => {
     if (a === b) return true;
@@ -33,7 +34,33 @@ $(function() {
     return true;
   }
 
-  renderStave = ({ clef, keys, signature }) => {
+  // m: array of chords (i.e., array of keys)
+  // t: major or minor
+  const listChords = ( m, t ) => {
+    $(`.${t}chords`).html(`<th>${capitalize(t)}</th>`);
+      m.forEach(c => {
+        $(`.${t}chords`).append(`<td class="chord ${c}">${c}</td>`);
+      });
+  };
+
+  // m: array of chords (i.e., array of keys)
+  const highlightChords = m => {
+    m.forEach(c => {
+      let n = Chord.notes(c);
+      if (chordsEqual(n, keys.map(k => k.substring(0, k.length - 1)))) {
+        $(`.chord.${c}`).addClass('highlight');
+      }
+    });
+  }
+
+  // Format number of flats/ sharps in a given key signature
+  const accidentalText = (s, t) => {
+    let count =  s[`${t}s`];
+    if (count=== 0) return '';
+    return `(${count} ${t}${(count > 1) ? 's' : ''})`;
+  }
+
+  const renderStave = ({ clef, keys, signature }) => {
 
     // Create a stave of width 400 at position 10, 40 on the canvas.
     let stave = new VF.Stave(10, 40, 550);
@@ -76,29 +103,16 @@ $(function() {
 
   const updateKeySignature = () => {
     signature = findSignature($('#signature').val()); // TODO: use tonal Key.props
+    
     majorChords = Key.chords(`${signature.major} major`);
     minorChords = Key.chords(`${signature.minor} minor`);
 
-    $('.majorchords').html('<th>Major</th>');
-    majorChords.forEach(c => {
-      $('.majorchords').append(`<td class="chord ${c}">${c}</td>`);
-    });
-
-    $('.minorchords').html('<th>Minor</th>');
-    minorChords.forEach(c => {
-      $('.minorchords').append(`<td class="chord ${c}">${c}</td>`);
-    });
+    listChords( majorChords, 'major');
+    listChords( minorChords, 'minor');
 
     renderStave({ clef, keys: [], signature });
   }
   
-  // Describes number of flats/ sharps in a given key signature
-  accidentalText = (s, t) => {
-    let count =  s[`${t}s`];
-    if (count=== 0) return '';
-    return `(${count} ${t}${(count > 1) ? 's' : ''})`;
-  }
-
   signatures.forEach(s => {
     $('#signature').append(`<option value="${s.id}">${s.major} major / ${s.minor} minor ${accidentalText(s, 'sharp') || accidentalText(s, 'flat') }</option>`);
   });
@@ -125,47 +139,36 @@ $(function() {
   input.getPortName(0); // Temp - Just look at first port for now
 
   const hasAccidental = (k,a) => (k.substring(1,2) == a);
-
+  
   let keys = [];
   input.on('message', function(deltaTime, message) {
 
-      const keyEventMessage = 144;
-      
-      let messageType = message[0];
-      let keyNo = message[1];
-      let velocity = message[2];
+    const keyEventMessage = 144;
+    
+    let messageType = message[0];
+    let keyNo = message[1];
+    let velocity = message[2];
 
-      let currentKey = Note.fromMidi(keyNo);
+    let currentKey = Note.fromMidi(keyNo);
 
-      // Key event for a defined key
-      if (messageType == keyEventMessage
-        && typeof currentKey !== 'undefined') {
+    // Key event for a defined key
+    if (messageType == keyEventMessage
+      && typeof currentKey !== 'undefined') {
 
-        if (velocity > 0) { 
-          if ( !( currentKey in keys ) ) {
-            // Add
-            keys.push(currentKey);
-          }
-        } else {
-          // Remove
-          keys.splice( keys.indexOf(currentKey), 1 );
-        } 
-      }
-
-      $('.chord').removeClass('highlight');
-      majorChords.forEach(c => {
-        let chordNotes = Chord.notes(c);
-        if (chordsEqual(chordNotes, keys.map(k => k.substring(0, k.length - 1)))) {
-          $(`.chord.${c}`).addClass('highlight');
+      if (velocity > 0) { 
+        if ( !( currentKey in keys ) ) {
+          // Add
+          keys.push(currentKey);
         }
-      });
-
-      minorChords.forEach(c => {
-        let chordNotes = Chord.notes(c);
-        if (chordsEqual(chordNotes, keys.map(k => k.substring(0, k.length - 1)))) {
-          $(`.chord.${c}`).addClass('highlight');
-        }
-      });
+      } else {
+        // Remove
+        keys.splice( keys.indexOf(currentKey), 1 );
+      } 
+    }
+    
+    $('.chord').removeClass('highlight');
+    highlightChords(majorChords);
+    highlightChords(minorChords);
       
     renderStave({
       clef, 
