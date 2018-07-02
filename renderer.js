@@ -21,7 +21,7 @@ $(function() {
   
   const findSignature = id => signatures.find(s => s.id === id);
 
-  chordsEqual = (a, b) => {
+  const chordsEqual = (a, b) => {
     if (a === b) return true;
     if (a == null || b == null) return false;
     if (a.length != b.length) return false;
@@ -48,10 +48,12 @@ $(function() {
 
     let note = new VF.StaveNote({ keys: ["b/4"], duration: "qr" });
     if (keys.length !== 0) {
-      note = new VF.StaveNote({ keys, duration: "q" });
+      note = new VF.StaveNote({ clef, keys, duration: "q" });
     }
     
     let accidentals = keys.map(k => hasAccidental(k,'b'));
+
+    console.log(keys);
 
     keys.forEach((k,i) => {
       if (accidentals[i]) {
