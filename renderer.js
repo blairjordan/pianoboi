@@ -22,7 +22,7 @@ $(function() {
   const findSignature = id => signatures.find(s => s.id === id);
   const capitalize = ([first,...rest]) => first.toUpperCase() + rest.join('').toLowerCase();
 
-  const chordsEqual = (a, b) => {
+  const chordsEqual = ( a, b ) => {
     if (a === b) return true;
     if (a == null || b == null) return false;
     if (a.length != b.length) return false;
@@ -54,7 +54,7 @@ $(function() {
   }
 
   // Format number of flats/ sharps in a given key signature
-  const accidentalText = (s, t) => {
+  const accidentalText = ( s, t ) => {
     let count =  s[`${t}s`];
     if (count=== 0) return '';
     return `(${count} ${t}${(count > 1) ? 's' : ''})`;
@@ -63,20 +63,35 @@ $(function() {
   const renderStave = ({ clef, keys, signature }) => {
 
     // Create a stave of width 400 at position 10, 40 on the canvas.
-    let stave = new VF.Stave(10, 40, 550);
-    stave.addClef(clef).addTimeSignature("4/4");
-    stave.addKeySignature(signature.id);
+    let topStaff = new VF.Stave(30, 40, 550);
+    let bottomStaff = new VF.Stave(30, 180, 550);
 
-    var notes = [
+    let brace = new Vex.Flow.StaveConnector(topStaff, bottomStaff).setType(3);
+    let lineRight = new Vex.Flow.StaveConnector(topStaff, bottomStaff).setType(6);
+    let lineLeft = new Vex.Flow.StaveConnector(topStaff, bottomStaff).setType(1);
+
+    topStaff.addClef(clef);
+    bottomStaff.addClef('bass');
+    topStaff.addKeySignature(signature.id).addTimeSignature('4/4');
+    bottomStaff.addKeySignature(signature.id).addTimeSignature('4/4');
+
+    let staveNotes = [
       new VF.StaveNote({ keys: ["b/4"], duration: "qr" }),
       new VF.StaveNote({ keys: ["b/4"], duration: "qr" }),
       new VF.StaveNote({ keys: ["b/4"], duration: "qr" }),
     ];
 
-    let note = new VF.StaveNote({ keys: ["b/4"], duration: "qr" });
-    if (keys.length !== 0) {
-      note = new VF.StaveNote({ clef, keys, duration: "q" });
+    let notes = {
+      notesTreble: [ ...staveNotes],
+      notesBass: [ ...staveNotes]
     }
+    
+    let noteTreble = new VF.StaveNote({ keys: ["b/4"], duration: "qr" });
+    let noteBass = new VF.StaveNote({ keys: ["b/4"], duration: "qr" });
+    if (keys.length !== 0) {
+      noteTreble = new VF.StaveNote({ clef: 'treble', keys, duration: "q" });
+      noteBass = new VF.StaveNote({ clef: 'bass', keys, duration: "q" });
+    } 
     
     let accidentals = keys.map(k => hasAccidental(k,'b'));
 
@@ -84,21 +99,36 @@ $(function() {
 
     keys.forEach((k,i) => {
       if (accidentals[i]) {
-        note.addAccidental(i, new Vex.Flow.Accidental('b'));
+        noteTreble.addAccidental(i, new Vex.Flow.Accidental('b'));
+        noteBass.addAccidental(i, new Vex.Flow.Accidental('b'));
       }
     });
 
-    notes.unshift(note);
+    notes.notesTreble.unshift(noteTreble);
+    notes.notesBass.unshift(noteBass);
 
-    var voice = new VF.Voice({num_beats: 4,  beat_value: 4});
-    voice.addTickables(notes);
+    console.log(notes);
+    let voiceTreble = new VF.Voice({num_beats: 4,  beat_value: 4, resolution: Vex.Flow.RESOLUTION});
+    voiceTreble.addTickables(notes.notesTreble);
+
+    let voiceBass = new VF.Voice({num_beats: 4,  beat_value: 4, resolution: Vex.Flow.RESOLUTION});
+    voiceBass.addTickables(notes.notesBass);
     
-    var formatter = new VF.Formatter().joinVoices([voice]).format([voice], 400);
+    let formatter = new VF.Formatter()
+      .joinVoices([voiceTreble])
+      .format([voiceTreble], 400)
+      .joinVoices([voiceBass])
+      .format([voiceBass], 400);
 
     context.clear();
-    stave.setContext(context).draw();
+    topStaff.setContext(context).draw();
+    brace.setContext(context).draw();
+    lineRight.setContext(context).draw();
+    lineLeft.setContext(context).draw();
+    bottomStaff.setContext(context).draw();
 
-    voice.draw(context, stave);
+    voiceTreble.draw(context, topStaff);
+    voiceBass.draw(context, bottomStaff);
   }
 
   const updateKeySignature = () => {
@@ -119,11 +149,6 @@ $(function() {
 
   $('#signature').on('change', function () {  
     updateKeySignature();    
-  });
-
-  $('#clef').on('change', function () {  
-    clef = $('#clef').val();
-    renderStave({ clef, keys: [], signature });
   });
 
   updateKeySignature();
