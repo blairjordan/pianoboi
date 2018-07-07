@@ -17,10 +17,10 @@ $(function() {
   let hasSharps = false;
   let majorChords, minorChords;
 
-  var input = new midi.input(); // Set up a new input
+  var input = new midi.input(); // set up a new input
   var portCount = input.getPortCount();
   console.log(`devices available: ${portCount}`);
-  input.getPortName(0); // Just look at the first port for now
+  input.getPortName(0); // just look at the first port for now
 
   let keys = [];
 
@@ -29,7 +29,9 @@ $(function() {
   const hasAccidental = (k,a) => (k.substring(1,2) == a);
   const findSignature = id => signatures.find(s => s.id === id);
   const capitalize = ([first,...rest]) => first.toUpperCase() + rest.join('').toLowerCase();
+  const isNatural = (n, altered) => (n.substring(2,3) !== `/`) && (altered.map(a => a.substring(0,1)).includes(n.substring(0,1)));
 
+  // returns true if both sets of chords are identical
   const chordsEqual = ( a, b ) => {
     if (a === b) return true;
     if (a == null || b == null) return false;
@@ -61,16 +63,17 @@ $(function() {
     });
   }
 
-  // Format number of flats/ sharps in a given key signature
+  // format number of flats/ sharps in a given key signature
   const accidentalText = ( s, t ) => {
     let count =  s[`${t}s`];
     if (count=== 0) return '';
     return `(${count} ${t}${(count > 1) ? 's' : ''})`;
   }
 
+  // TODO: disambiguate "keys" (notes) from keySignatures
   const renderStave = ({ keys, signature }) => {
 
-    // Create a stave of width 400 at position 10, 40 on the canvas.
+    // create a stave of width 400 at position 10, 40 on the canvas.
     let topStaff = new VF.Stave(30, 40, 550);
     let bottomStaff = new VF.Stave(30, 180, 550);
 
@@ -104,16 +107,23 @@ $(function() {
     let flats = keys.map(k => hasAccidental(k,'b'));
     let sharps = keys.map(k => hasAccidental(k,'#'));
 
-    console.log(keys);
+    let alteredNotes = Key.alteredNotes(`${signature.id} major`).map(n => n.toLowerCase());
 
     keys.forEach((k,i) => {
-      if (flats[i]) {
-        noteTreble.addAccidental(i, new Vex.Flow.Accidental('b'));
-        noteBass.addAccidental(i, new Vex.Flow.Accidental('b'));
+      if (!alteredNotes.includes(k.substring(0,2))) {
+        if (flats[i]) {
+          noteTreble.addAccidental(i, new Vex.Flow.Accidental('b'));
+          noteBass.addAccidental(i, new Vex.Flow.Accidental('b'));
+        }
+        if (sharps[i]) {
+          noteTreble.addAccidental(i, new Vex.Flow.Accidental('#'));
+          noteBass.addAccidental(i, new Vex.Flow.Accidental('#'));
+        }
       }
-      if (sharps[i]) {
-        noteTreble.addAccidental(i, new Vex.Flow.Accidental('#'));
-        noteBass.addAccidental(i, new Vex.Flow.Accidental('#'));
+
+      if (isNatural(k, alteredNotes)) {
+        noteTreble.addAccidental(i, new Vex.Flow.Accidental('n'));
+        noteBass.addAccidental(i, new Vex.Flow.Accidental('n'));
       }
     });
 
@@ -170,21 +180,17 @@ $(function() {
     let keyNo = message[1];
     let velocity = message[2];
 
-    // TODO: Set second param to true for sharps.
-    // https://github.com/danigb/tonal/blob/master/docs/API.md#notefrommidimidi-boolean--string
     let currentKey = Note.fromMidi(keyNo, (signature.sharps > 1));
 
-    // Key event for a defined key
+    // key event for a defined key
     if (messageType == keyEventMessage
       && typeof currentKey !== 'undefined') {
 
       if (velocity > 0) { 
         if ( !( currentKey in keys ) ) {
-          // Add
           keys.push(currentKey);
         }
       } else {
-        // Remove
         keys.splice( keys.indexOf(currentKey), 1 );
       } 
     }
@@ -199,10 +205,10 @@ $(function() {
     });
   });
 
-  // Open the first available input port.
+  // open the first available input port.
   input.openPort(0);
 
-  // Sysex, timing, and active sensing messages are ignored
+  // sysex, timing, and active sensing messages are ignored
   input.ignoreTypes(false, false, false);
 
 });
