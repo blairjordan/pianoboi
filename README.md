@@ -2,6 +2,8 @@
 
 A simple application to assist with reading sheet music.
 
+![](images/screenshot1.png?raw=true)
+
 ## How to use
 
 ```bash
