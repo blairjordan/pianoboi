@@ -1,6 +1,8 @@
 # Pianoboi
 
-A simple application to assist with reading sheet music.
+A real-time sheet music display from midi input.
+
+![](images/screenshot1.png?raw=true)
 
 ## How to use
 
