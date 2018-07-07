@@ -13,12 +13,20 @@ $(function() {
   const renderer = new VF.Renderer(document.getElementById("sheetmusic"), VF.Renderer.Backends.SVG);
   const context = renderer.getContext();
 
-  let signature = 'C';
-  let clef = 'treble';
+  let signature = {};
+  let hasSharps = false;
   let majorChords, minorChords;
+
+  var input = new midi.input(); // Set up a new input
+  var portCount = input.getPortCount();
+  console.log(`devices available: ${portCount}`);
+  input.getPortName(0); // Just look at the first port for now
+
+  let keys = [];
 
   renderer.resize(800, 600);
   
+  const hasAccidental = (k,a) => (k.substring(1,2) == a);
   const findSignature = id => signatures.find(s => s.id === id);
   const capitalize = ([first,...rest]) => first.toUpperCase() + rest.join('').toLowerCase();
 
@@ -60,7 +68,7 @@ $(function() {
     return `(${count} ${t}${(count > 1) ? 's' : ''})`;
   }
 
-  const renderStave = ({ clef, keys, signature }) => {
+  const renderStave = ({ keys, signature }) => {
 
     // Create a stave of width 400 at position 10, 40 on the canvas.
     let topStaff = new VF.Stave(30, 40, 550);
@@ -70,20 +78,20 @@ $(function() {
     let lineRight = new Vex.Flow.StaveConnector(topStaff, bottomStaff).setType(6);
     let lineLeft = new Vex.Flow.StaveConnector(topStaff, bottomStaff).setType(1);
 
-    topStaff.addClef(clef);
+    topStaff.addClef('treble');
     bottomStaff.addClef('bass');
     topStaff.addKeySignature(signature.id).addTimeSignature('4/4');
     bottomStaff.addKeySignature(signature.id).addTimeSignature('4/4');
 
-    let staveNotes = [
+    let rests  = [
       new VF.StaveNote({ keys: ["b/4"], duration: "qr" }),
       new VF.StaveNote({ keys: ["b/4"], duration: "qr" }),
       new VF.StaveNote({ keys: ["b/4"], duration: "qr" }),
     ];
 
     let notes = {
-      notesTreble: [ ...staveNotes],
-      notesBass: [ ...staveNotes]
+      notesTreble: [ ...rests],
+      notesBass: [ ...rests]
     }
     
     let noteTreble = new VF.StaveNote({ keys: ["b/4"], duration: "qr" });
@@ -93,26 +101,27 @@ $(function() {
       noteBass = new VF.StaveNote({ clef: 'bass', keys, duration: "q" });
     } 
     
-    let accidentals = keys.map(k => hasAccidental(k,'b'));
+    let flats = keys.map(k => hasAccidental(k,'b'));
+    let sharps = keys.map(k => hasAccidental(k,'#'));
 
     console.log(keys);
 
     keys.forEach((k,i) => {
-      if (accidentals[i]) {
+      if (flats[i]) {
         noteTreble.addAccidental(i, new Vex.Flow.Accidental('b'));
         noteBass.addAccidental(i, new Vex.Flow.Accidental('b'));
+      }
+      if (sharps[i]) {
+        noteTreble.addAccidental(i, new Vex.Flow.Accidental('#'));
+        noteBass.addAccidental(i, new Vex.Flow.Accidental('#'));
       }
     });
 
     notes.notesTreble.unshift(noteTreble);
     notes.notesBass.unshift(noteBass);
 
-    console.log(notes);
-    let voiceTreble = new VF.Voice({num_beats: 4,  beat_value: 4, resolution: Vex.Flow.RESOLUTION});
-    voiceTreble.addTickables(notes.notesTreble);
-
-    let voiceBass = new VF.Voice({num_beats: 4,  beat_value: 4, resolution: Vex.Flow.RESOLUTION});
-    voiceBass.addTickables(notes.notesBass);
+    let voiceTreble = new VF.Voice({num_beats: 4,  beat_value: 4, resolution: Vex.Flow.RESOLUTION}).addTickables(notes.notesTreble);
+    let voiceBass = new VF.Voice({num_beats: 4,  beat_value: 4, resolution: Vex.Flow.RESOLUTION}).addTickables(notes.notesBass);
     
     let formatter = new VF.Formatter()
       .joinVoices([voiceTreble])
@@ -132,7 +141,7 @@ $(function() {
   }
 
   const updateKeySignature = () => {
-    signature = findSignature($('#signature').val()); // TODO: use tonal Key.props
+    signature = findSignature($('#signature').val());
     
     majorChords = Key.chords(`${signature.major} major`);
     minorChords = Key.chords(`${signature.minor} minor`);
@@ -140,7 +149,7 @@ $(function() {
     listChords( majorChords, 'major');
     listChords( minorChords, 'minor');
 
-    renderStave({ clef, keys: [], signature });
+    renderStave({ keys: [], signature });
   }
   
   signatures.forEach(s => {
@@ -153,19 +162,6 @@ $(function() {
 
   updateKeySignature();
 
-  // Set up a new input.
-  var input = new midi.input();
-
-  // Count the available input ports.
-  var portCount = input.getPortCount();
-
-  console.log(`devices available: ${portCount}`);
-
-  input.getPortName(0); // Temp - Just look at first port for now
-
-  const hasAccidental = (k,a) => (k.substring(1,2) == a);
-  
-  let keys = [];
   input.on('message', function(deltaTime, message) {
 
     const keyEventMessage = 144;
@@ -176,7 +172,7 @@ $(function() {
 
     // TODO: Set second param to true for sharps.
     // https://github.com/danigb/tonal/blob/master/docs/API.md#notefrommidimidi-boolean--string
-    let currentKey = Note.fromMidi(keyNo);
+    let currentKey = Note.fromMidi(keyNo, (signature.sharps > 1));
 
     // Key event for a defined key
     if (messageType == keyEventMessage
@@ -198,7 +194,6 @@ $(function() {
     highlightChords(minorChords);
       
     renderStave({
-      clef, 
       keys: (Array.sort(keys)).map(k => `${k.substring(0,k.search(/\d/)).toLowerCase()}/${k.substring(k.search(/\d/),k.length)}`),
       signature
     });
