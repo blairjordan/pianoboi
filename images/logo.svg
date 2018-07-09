@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="875.0386" height="307.5186" viewBox="0 0 875.0386 307.5186">
+  <defs>
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css?family=Pacifico');
+      text {
+        font-size: 120px;
+        font-family: "Pacifico";
+        fill: #4885ed;
+      }
+    </style>
+  </defs>
+  <text transform="translate(45 200)">pianoboi</text>
+</svg>
