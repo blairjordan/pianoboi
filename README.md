@@ -1,6 +1,4 @@
-
-![Alt text](./images/logo.svg)
-<img src="./images/logo.svg">
+![](images/logo.png?raw=true)
 
 A real-time sheet music display from midi input.
 
