@@ -1,11 +1,12 @@
 let {ipcRenderer, remote} = require('electron');  
 let main = remote.require("./main.js");
 const midi = require('midi');
-const { signatures } = require('./signatures.js');
+const { signatures } = require('./signatures');
 window.$ = window.jQuery = require('jquery');
 const { Note, Array, Chord } = require('tonal');
 const Key = require("tonal-key")
 const Vex = require('vexflow');
+const {centerPiano, keyMarkup, buildKeyboard} = require('./piano');
 
 $(function() {
 
@@ -153,8 +154,7 @@ $(function() {
   const updateKeySignature = () => {
     signature = findSignature($('#signature').val());
     
-    majorChords = Key.chords(`${signature.major} major`);
-    minorChords = Key.chords(`${signature.minor} minor`);
+    [ majorChords, minorChords] = [ Key.chords(`${signature.major} major`), Key.chords(`${signature.minor} minor`) ];
 
     listChords( majorChords, 'major');
     listChords( minorChords, 'minor');
@@ -171,6 +171,13 @@ $(function() {
   });
 
   updateKeySignature();
+
+  const highlightPianoKeys = keys => {
+    $('.keys .key').removeClass('pressed');
+    keys.forEach(k => {
+      $(`*[data-keyno="${Note.midi(k)}"]`).addClass('pressed');
+    });
+  }
 
   input.on('message', function(deltaTime, message) {
 
@@ -198,6 +205,7 @@ $(function() {
     $('.chord').removeClass('highlight');
     highlightChords(majorChords);
     highlightChords(minorChords);
+    highlightPianoKeys(keys);
       
     renderStave({
       keys: (Array.sort(keys)).map(k => `${k.substring(0,k.search(/\d/)).toLowerCase()}/${k.substring(k.search(/\d/),k.length)}`),
@@ -211,4 +219,6 @@ $(function() {
   // sysex, timing, and active sensing messages are ignored
   input.ignoreTypes(false, false, false);
 
+  buildKeyboard('.keys', 7, 'black', 24);
+  centerPiano('#piano', 84, 36);
 });

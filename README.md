@@ -18,7 +18,7 @@ npm start
 ```
 
 ## TODO List
- - [ ] Add piano display (easy)
+ - [X] Add piano display (easy)
  - [ ] Add midi input management (medium)
  - [ ] Add snapshot functionality (hard)
  - [ ] Add scale display (medium)

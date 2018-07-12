@@ -2,7 +2,6 @@ body {
   background-color: hsl(24, 10%, 90%);
   margin: 2rem;
   font-family: Arial, Helvetica, sans-serif;
-
 }
 body.span {
   color: rgba(0,0,0,0.9);
@@ -29,4 +28,61 @@ td, th {
 .highlight {
   background: rgb(0, 61, 141);
   color: white;
+}
+#piano {
+  position: relative;
+  margin: 2em 0 0 0;
+  width:1200px;
+  border-radius: 10px;
+  box-shadow: 0 1px 0 #999, 0 2px 0 #999, 0 3px 0 #999, 1px 4px 0 #999, 2px 5px 0 #999, 3px 6px 0 #999, 4px 7px 0 #999, 5px 8px 0 #999, 0 0 8px #000;
+  overflow: auto;
+}
+#piano .keys {
+  width: 2548px;
+  padding: 2px 0 0 2px;
+  overflow: hidden;
+  background: #000;
+  border-radius: 0 0 4px 4px;
+}
+.keys .key {
+  float: left;
+  position: relative;
+  width: 50px;
+  height: 180px;
+  margin: 0 2px 2px 0;
+  background: #fff;
+  border-radius: 0 0 4px 4px;
+}
+.key.pressed,
+.key:active {
+  background: rgb(0, 61, 141);
+  box-shadow: inset 3px 2px 3px rgb(0, 42, 97), inset -3px 2px 3px rgb(0, 42, 97);
+}
+.key.black {
+  width: 0;
+  margin: 0;
+  z-index: 2;
+}
+.key.black:after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -16px;
+  display: block;
+  width: 32px;
+  height: 117px;
+  background: #000;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 1px 1px 0 #555, 2px 2px 0 #555;
+}
+.key.black1:after {
+  left: -20px;
+}
+.key.black3:after {
+  left: -16px;
+}
+.key.black.pressed:after,
+.key.black:active:after {
+  background-color: rgb(0, 79, 182);
+  box-shadow: inset 3px 2px 3px rgb(0, 60, 139), inset -3px 2px 3px rgb(0, 60, 139);
 }
