@@ -16,9 +16,3 @@ npm install
 # Run the app
 npm start
 ```
-
-## TODO List
- - [X] Add piano display (easy)
- - [ ] Add midi input management (medium)
- - [ ] Add snapshot functionality (hard)
- - [ ] Add scale display (medium)
