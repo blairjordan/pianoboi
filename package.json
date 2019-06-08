@@ -29,6 +29,6 @@
     "tonal": "^2.1.2",
     "update-electron-app": "^1.3.0",
     "vexflow": "^1.2.84",
-    "webmidi": "^2.3.3"
+    "web-midi-api": "^2.0.5"
   }
 }

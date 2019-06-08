@@ -1,6 +1,6 @@
 let { ipcRenderer, remote } = require("electron");
 let main = remote.require("./main.js");
-const midi = require("webmidi");
+const navigator = require('web-midi-api'); // change to jzz
 const { signatures } = require("./signatures");
 window.$ = window.jQuery = require("jquery");
 const { Note, Array, Chord } = require("tonal");
@@ -20,10 +20,38 @@ $(function() {
   let hasSharps = false;
   let majorChords, minorChords;
 
-  midi.enable(function(err) {
-    if (err) return;
 
-    var input = midi.inputs[0]; // set up a new input
+  let midi;
+  let inputs;
+  let outputs;
+
+  function onMIDIFailure(msg){
+    console.log('Failed to get MIDI access - ' + msg);
+    process.exit(1);
+  }
+
+  
+  testInputs = () => {
+    console.log('Testing MIDI-In ports...');
+    console.log(inputs);
+    inputs.forEach(function(port){
+      console.log('id:', port.id, 'manufacturer:', port.manufacturer, 'name:', port.name, 'version:', port.version);
+      port.onmidimessage = onMidiIn;
+    });
+  }
+  
+  function onMIDISuccess(midiAccess){
+    midi = midiAccess;
+    inputs = midi.inputs;
+    testInputs();
+  }
+
+  function onMidiIn(ev){
+    console.log(ev.data);
+    handler(ev.data);
+  }
+
+  navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
 
     let keys = [];
 
@@ -206,22 +234,14 @@ $(function() {
       });
     };
 
-    input.on("noteon", function(deltaTime, message) {
-      handler(message.note);
-    });
+    const handler = e => {
 
-    input.on("noteoff", function(deltaTime, message) {
-      handler(message.note);
-    });
-
-    const handler = () => {
       const keyEventMessage = 144;
+      const messageType = e[0];
+      const keyNo = e[1];
+      const velocity = e[2];
 
-      let messageType = message[0];
-      let keyNo = message[1];
-      let velocity = message[2];
-
-      let currentKey = Note.fromMidi(keyNo, signature.sharps > 1);
+      const currentKey = Note.fromMidi(keyNo, signature.sharps > 1);
 
       // key event for a defined key
       if (messageType == keyEventMessage && typeof currentKey !== "undefined") {
@@ -251,13 +271,7 @@ $(function() {
       });
     };
 
-    // open the first available input port.
-    input.openPort(0);
-
-    // sysex, timing, and active sensing messages are ignored
-    input.ignoreTypes(false, false, false);
-
     buildKeyboard(".keys", 7, "black", 24);
     centerPiano("#piano", 84, 36);
+  
   });
-});
