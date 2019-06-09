@@ -6,7 +6,7 @@ window.$ = window.jQuery = require("jquery");
 const { Note, Array, Chord } = require("tonal");
 const Key = require("tonal-key");
 const Vex = require("vexflow");
-const { centerPiano, keyMarkup, buildKeyboard } = require("./piano");
+const { centerPiano, buildKeyboard } = require("./piano");
 
 $(function() {
   const VF = Vex.Flow;
