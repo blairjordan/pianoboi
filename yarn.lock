@@ -1398,10 +1398,10 @@ jsprim@^1.2.2:
     json-schema "0.2.3"
     verror "1.10.0"
 
-jzz@^0.7.5:
-  version "0.7.9"
-  resolved "https://registry.yarnpkg.com/jzz/-/jzz-0.7.9.tgz#98dfc64c57ac6cf7f17e7b35a09c3ede93a44808"
-  integrity sha512-XFWGOQLdS8m9ipJA6qru4u7QB7Nx1LoYmNSAXMrFF9phAspRaLgw5u35lqPMPq920RBM1NOCdSFaCW+EpkA8Pw==
+jzz@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/jzz/-/jzz-0.8.0.tgz#e5457ea5d7822062e5aed32c5672d51a63b3df46"
+  integrity sha512-ptjQMZfsn6JuW3ffnUp4sq3lDQlOePd66aIcS7BsbdJEOA6Rl7hXLOTiGIIMsAypg4iGYpHYt+mSf+QEQ0sROA==
   dependencies:
     jazz-midi "^1.6.9"
 
@@ -3477,13 +3477,6 @@ wcwidth@^1.0.0, wcwidth@^1.0.1:
   integrity sha1-8LDc+RW8X/FSivrbLA4XtTLaL+g=
   dependencies:
     defaults "^1.0.3"
-
-web-midi-api@^2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/web-midi-api/-/web-midi-api-2.0.5.tgz#cac9b17fe77f8a256131b1e8f5374b9c1b1fd8b8"
-  integrity sha512-FoxjVMGX6OQZslZzzkSW2oPVUsvr1wyINc6PaDj3j3Zh38RcCgZrePf+q8KmRVvSbZM2DWv07mQjVaCNQZA2WA==
-  dependencies:
-    jzz "^0.7.5"
 
 which-module@^2.0.0:
   version "2.0.0"
