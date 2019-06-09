@@ -1,6 +1,10 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow, ipcMain} = require('electron')
 
+try {
+	require('electron-reloader')(module); 
+} catch (_) {} 
+
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = '1';
 
 // Keep a global reference of the window object, if you don't, the window will

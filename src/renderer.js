@@ -17,7 +17,6 @@ $(function() {
   const context = renderer.getContext();
 
   let signature = {};
-  let hasSharps = false;
   let majorChords, minorChords;
 
   midi()
