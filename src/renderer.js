@@ -81,8 +81,8 @@ $(function() {
   // TODO: disambiguate "keys" (notes) from keySignatures
   const renderStave = ({ keys, signature }) => {
     // create a stave of width 400 at position 10, 40 on the canvas.
-    const topStaff = new VF.Stave(30, 40, 550);
-    const bottomStaff = new VF.Stave(30, 180, 550);
+    const topStaff = new VF.Stave(30, 40, 130);
+    const bottomStaff = new VF.Stave(30, 100, 130);
 
     const brace = new Vex.Flow.StaveConnector(topStaff, bottomStaff).setType(3);
     const lineRight = new Vex.Flow.StaveConnector(topStaff, bottomStaff).setType(6);
@@ -93,15 +93,9 @@ $(function() {
     topStaff.addKeySignature(signature.id).addTimeSignature("4/4");
     bottomStaff.addKeySignature(signature.id).addTimeSignature("4/4");
 
-    const rests = [
-      new VF.StaveNote({ keys: ["b/4"], duration: "qr" }),
-      new VF.StaveNote({ keys: ["b/4"], duration: "qr" }),
-      new VF.StaveNote({ keys: ["b/4"], duration: "qr" })
-    ];
-
     const notes = {
-      notesTreble: [...rests],
-      notesBass: [...rests]
+      notesTreble: [],
+      notesBass: []
     };
 
     let noteTreble = new VF.StaveNote({ keys: ["b/4"], duration: "qr" });
@@ -138,12 +132,12 @@ $(function() {
     notes.notesBass.unshift(noteBass);
 
     let voiceTreble = new VF.Voice({
-      num_beats: 4,
+      num_beats: 1,
       beat_value: 4,
       resolution: Vex.Flow.RESOLUTION
     }).addTickables(notes.notesTreble);
     let voiceBass = new VF.Voice({
-      num_beats: 4,
+      num_beats: 1,
       beat_value: 4,
       resolution: Vex.Flow.RESOLUTION
     }).addTickables(notes.notesBass);
