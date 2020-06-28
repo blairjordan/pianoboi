@@ -19,7 +19,7 @@ $(function() {
   let signature = {};
   let majorChords, minorChords;
 
-  midi()
+  midi({engine:'webmidi'})
     .openMidiIn()
     .or("Cannot open MIDI In port!")
     .and(function() {
