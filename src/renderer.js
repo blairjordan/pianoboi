@@ -196,22 +196,14 @@ $(function() {
   };
 
   const handler = e => {
-    const keyEventMessage = 144;
-    const messageType = e[0];
-    const keyNo = e[1];
-    const velocity = e[2];
+    const currentKey = Note.fromMidi(e.getNote(), signature.sharps > 1);
 
-    const currentKey = Note.fromMidi(keyNo, signature.sharps > 1);
-
-    // key event for a defined key
-    if (messageType == keyEventMessage && typeof currentKey !== "undefined") {
-      if (velocity > 0) {
-        if (!(currentKey in keys)) {
-          keys.push(currentKey);
-        }
-      } else {
-        keys.splice(keys.indexOf(currentKey), 1);
+    if ((e.isNoteOn() && e.getVelocity() > 0) && typeof currentKey !== "undefined") {
+      if (!(currentKey in keys)) {
+        keys.push(currentKey);
       }
+    } else if ((e.isNoteOn() && e.getVelocity() == 0) || e.isNoteOff()) {
+      keys.splice(keys.indexOf(currentKey), 1);
     }
 
     $(".chord").removeClass("highlight");
