@@ -1,12 +1,15 @@
-let { ipcRenderer, remote } = require("electron");
+
+import { ipcRenderer, remote } from 'electron';
+import * as midi from 'jzz';
+import { Note, Array, Chord } from 'tonal';
+import * as Key from '@tonaljs/key'
+import * as Vex from 'vexflow';
+
+import { centerPiano, buildKeyboard, signatures, Signature, capitalize, KeyId, Accidental } from './';
+
 let main = remote.require("./main.js");
-const midi = require("jzz");
-const { signatures } = require("./signatures");
+
 window.$ = window.jQuery = require("jquery");
-const { Note, Array, Chord } = require("tonal");
-const Key = require("tonal-key");
-const Vex = require("vexflow");
-const { centerPiano, buildKeyboard } = require("./piano");
 
 $(function() {
   const VF = Vex.Flow;
@@ -16,7 +19,7 @@ $(function() {
   );
   const context = renderer.getContext();
 
-  let signature = {};
+  let signature: Signature | undefined;
   let majorChords, minorChords;
 
   midi({engine:'webmidi'})
@@ -27,15 +30,13 @@ $(function() {
     })
     .connect(e => handler(e));
 
-  let keys = [];
+  let keys: KeyId[] = [];
 
   renderer.resize(800, 600);
 
-  const hasAccidental = (k, a) => k.substring(1, 2) == a;
-  const findSignature = id => signatures.find(s => s.id === id);
-  const capitalize = ([first, ...rest]) =>
-    first.toUpperCase() + rest.join("").toLowerCase();
-  const isNatural = (n, altered) =>
+  const hasAccidental = (k: KeyId, a: Accidental) => k.substring(1, 2) == a;
+  const findSignature = (id: string): Signature => signatures.find(s => s.id === id);
+  const isNatural = (n: string, altered: string[]) =>
     n.substring(2, 3) !== `/` &&
     altered.map(a => a.substring(0, 1)).includes(n.substring(0, 1));
 
@@ -62,11 +63,11 @@ $(function() {
   };
 
   // m: array of chords (i.e., array of keys)
-  const highlightChords = m => {
+  const highlightChords = (m: KeyId[]) => {
     m.forEach(c => {
       let n = Chord.notes(c);
       if (chordsEqual(n, keys.map(k => k.substring(0, k.length - 1)))) {
-        $(`.chord.${c}`).addClass("highlight");
+        $(`.chord.${c}`).addClass('highlight');
       }
     });
   };
@@ -75,11 +76,11 @@ $(function() {
   const accidentalText = (s, t) => {
     let count = s[`${t}s`];
     if (count === 0) return "";
-    return `(${count} ${t}${count > 1 ? "s" : ""})`;
+    return `(${count} ${t}${count > 1 ? 's' : ''})`;
   };
 
   // TODO: disambiguate "keys" (notes) from keySignatures
-  const renderStave = ({ keys, signature }) => {
+  const renderStave = ({ keys, signature }: { keys: KeyId[], signature: Signature }) => {
     // create a stave of width 400 at position 10, 40 on the canvas.
     const topStaff = new VF.Stave(30, 40, 130);
     const bottomStaff = new VF.Stave(30, 100, 130);
@@ -159,7 +160,7 @@ $(function() {
     voiceBass.draw(context, bottomStaff);
   };
 
-  const updateKeySignature = () => {
+  const mutateKeySignature = () => {
     signature = findSignature($("#signature").val());
 
     [majorChords, minorChords] = [
@@ -183,12 +184,12 @@ $(function() {
   });
 
   $("#signature").on("change", function() {
-    updateKeySignature();
+    mutateKeySignature();
   });
 
-  updateKeySignature();
+  mutateKeySignature();
 
-  const highlightPianoKeys = keys => {
+  const highlightPianoKeys = (keys: KeyId[]) => {
     $(".keys .key").removeClass("pressed");
     keys.forEach(k => {
       $(`*[data-keyno="${Note.midi(k)}"]`).addClass("pressed");

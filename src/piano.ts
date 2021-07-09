@@ -16,4 +16,7 @@ const buildKeyboard = (s, o, m, k) => {
   }
 };
 
-module.exports = {centerPiano, buildKeyboard};
+export {
+  centerPiano,
+  buildKeyboard
+};

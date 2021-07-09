@@ -1,4 +1,16 @@
-const signatures = 
+type KeyId = string;
+
+type Signature = {
+  id: KeyId;
+  major: string;
+  minor: string;
+  sharps: number;
+  flats: number;
+};
+
+type Accidental = '#' | 'b';
+
+const signatures: Signature[] = 
 [
   { id: 'C',  major: 'C',        minor: 'A',       sharps: 0, flats: 0 },
   { id: 'G',  major: 'G',        minor: 'E',       sharps: 1, flats: 0 },
@@ -17,4 +29,4 @@ const signatures =
   { id: 'Cb', major: 'Cb',       minor: 'Ab',      sharps: 0, flats: 7 },
 ];
 
-module.exports = { signatures };
+export { Signature, KeyId, signatures, Accidental };

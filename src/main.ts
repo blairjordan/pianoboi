@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, ipcMain} = require('electron')
+import { app, BrowserWindow, ipcMain } from 'electron';
 
 try {
 	require('electron-reloader')(module); 
@@ -9,7 +9,7 @@ process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = '1';
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow
+let mainWindow: BrowserWindow;
 
 function createWindow () {
   // Create the browser window.
