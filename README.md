@@ -4,11 +4,12 @@ I'm choosing to revive this project, as there are still people who find this sof
 
 My main focus areas will be:
 
-- 🔃 Converting codebase to Typescript, updating softare versions
+- 🔃 Converting codebase to Typescript, updating software versions
 - ⚙ Adding simple MIDI input management
 - 📦 Creating binary releases for Windows/ Linux/ Mac
 - 🎨 UI improvements
 - 💬 Anything else I missed? Create a feature request via a GitHub Issue! 
+
 
 ![](images/logo.png?raw=true)
 
