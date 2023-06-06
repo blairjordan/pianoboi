@@ -1,22 +1,51 @@
-const diatonicScale = [2,2,1,2,2,2,1];
+const diatonicScale = [2, 2, 1, 2, 2, 2, 1]
 
-const centerPiano = (s, t, c) => {
-  $(s).scrollLeft(((c * $(s)[0].scrollWidth) / t) - $(s).width() / 2);
-};
+const centerPiano = ({
+  selector,
+  totalWidth,
+  currentPosition,
+}: {
+  selector: string
+  totalWidth: number
+  currentPosition: number
+}): void => {
+  $(selector).scrollLeft(
+    (currentPosition * $(selector)[0].scrollWidth) / totalWidth -
+      $(selector).width() / 2
+  )
+}
 
-const keyMarkup = (k, m='') => `<div class="key ${m}" data-keyno="${k}"></div>`;
+const keyMarkup = ({
+  keyNumber,
+  modifier = "",
+}: {
+  keyNumber: number
+  modifier?: string
+}): string => `<div class="key ${modifier}" data-keyno="${keyNumber}"></div>`
 
-const buildKeyboard = (s, o, m, k) => {
-  for (let i = 0; i < o; i++) {
-    diatonicScale.forEach((d,j) => {
-      $(s).append(
-        (d == 2) ? `${keyMarkup(k++)}${keyMarkup(k++,m)}` : keyMarkup(k++)
+const buildKeyboard = ({
+  selector,
+  octaveCount,
+  modifier,
+  initialKey,
+}: {
+  selector: string
+  octaveCount: number
+  modifier: string
+  initialKey: number
+}): void => {
+  for (let i = 0; i < octaveCount; i++) {
+    diatonicScale.forEach((diatonicStep, j) => {
+      $(selector).append(
+        diatonicStep === 2
+          ? `${keyMarkup({ keyNumber: initialKey++ })}${keyMarkup({
+              keyNumber: initialKey++,
+              modifier,
+            })}`
+          : keyMarkup({ keyNumber: initialKey++ })
       )
-    });
+    })
   }
-};
+}
 
-export {
-  centerPiano,
-  buildKeyboard
-};
+export { centerPiano, buildKeyboard }

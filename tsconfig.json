@@ -7,7 +7,9 @@
     "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*"]
-    }
+    },
+    "skipLibCheck": true,
+    "types": ["css-font-loading-module"]
   },
   "include": [
     "src/**/*"

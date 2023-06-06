@@ -4,7 +4,7 @@
   "description": "A musical notation helper",
   "main": "main.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && copyfiles -u 1 \"public/**/*\" dist",
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
     "start": "npm run build && electron ./dist/main.js"
@@ -19,10 +19,14 @@
   "author": "B. Jordan",
   "license": "MIT",
   "devDependencies": {
-    "@types/vexflow": "^3.0.1",
+    "@types/css-font-loading-module": "^0.0.8",
+    "@types/jquery": "^3.5.16",
+    "@types/vexflow": "^1.2.38",
     "@typescript-eslint/eslint-plugin": "^4.27.0",
     "@typescript-eslint/parser": "^4.27.0",
+    "copyfiles": "^2.4.1",
     "electron": "^13.1.6",
+    "electron-reload": "^2.0.0-alpha.1",
     "eslint": "^7.28.0",
     "typescript": "^4.3.4"
   },
@@ -31,11 +35,10 @@
     "url": "https://github.com/blairjordan/pianoboi.git"
   },
   "dependencies": {
-    "@tonaljs/key": "^4.6.0",
-    "@types/jquery": "^3.5.6",
-    "jquery": "^3.6.0",
-    "jzz": "^0.8.0",
+    "@tonaljs/tonal": "^4.10.0",
+    "jquery": "^3.7.0",
     "tonal": "^2.1.2",
-    "vexflow": "^1.2.84"
+    "vexflow": "^4.1.0",
+    "webmidi": "^3.1.6"
   }
 }

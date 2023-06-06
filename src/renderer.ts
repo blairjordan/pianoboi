@@ -1,229 +1,304 @@
+import { WebMidi, NoteMessageEvent, Note } from "webmidi"
+import { Chord, Key } from "@tonaljs/tonal"
+import * as Vex from "vexflow"
+import * as $ from "jquery"
 
-import { ipcRenderer, remote } from 'electron';
-import * as midi from 'jzz';
-import { Note, Array, Chord } from 'tonal';
-import * as Key from '@tonaljs/key'
-import * as Vex from 'vexflow';
+import {
+  centerPiano,
+  buildKeyboard,
+  signatures,
+  Signature,
+  capitalize,
+  KeyId,
+  Accidental,
+} from "./"
 
-import { centerPiano, buildKeyboard, signatures, Signature, capitalize, KeyId, Accidental } from './';
-
-let main = remote.require("./main.js");
-
-window.$ = window.jQuery = require("jquery");
-
-$(function() {
-  const VF = Vex.Flow;
+$(function () {
+  const VF = Vex.Flow
   const renderer = new VF.Renderer(
-    document.getElementById("sheetmusic"),
+    document.getElementById("sheetmusic") as HTMLDivElement,
     VF.Renderer.Backends.SVG
-  );
-  const context = renderer.getContext();
+  )
+  const context = renderer.getContext()
 
-  let signature: Signature | undefined;
-  let majorChords, minorChords;
+  let signature: Signature | undefined
 
-  midi({engine:'webmidi'})
-    .openMidiIn()
-    .or("Cannot open MIDI In port!")
-    .and(function() {
-      console.log("MIDI-In: ", this.name());
-    })
-    .connect(e => handler(e));
+  let [majorChords, minorChords]: [string[], string[]] = [[], []]
 
-  let keys: KeyId[] = [];
+  // Function triggered when WEBMIDI.js is ready
+  const onEnabled = () => {
+    console.log("enabled")
+    // Display available MIDI input devices
+    console.log(WebMidi.inputs)
 
-  renderer.resize(800, 600);
+    // FIXME: Fetch from device manager
+    const device = WebMidi.inputs[1]
 
-  const hasAccidental = (k: KeyId, a: Accidental) => k.substring(1, 2) == a;
-  const findSignature = (id: string): Signature => signatures.find(s => s.id === id);
+    if (!device) {
+      console.error("🤷‍♂️ No device found")
+      return
+    }
+
+    device.channels[1].addListener("noteon", (event) =>
+      noteEventHandler({ event })
+    )
+
+    device.channels[1].addListener("noteoff", (event) =>
+      noteEventHandler({ event })
+    )
+  }
+
+  WebMidi.enable()
+    .then(onEnabled)
+    .catch((err: any) => alert(err))
+
+  let notes: Note[] = []
+
+  renderer.resize(800, 600)
+
+  const hasAccidental = (k: KeyId, a: Accidental) => k.substring(1, 2) == a
+  const findSignature = ({ id }: { id: string }): Signature =>
+    signatures.find((s) => s.id === id)
+
   const isNatural = (n: string, altered: string[]) =>
     n.substring(2, 3) !== `/` &&
-    altered.map(a => a.substring(0, 1)).includes(n.substring(0, 1));
+    altered.map((a) => a.substring(0, 1)).includes(n.substring(0, 1))
 
   // returns true if both sets of chords are identical
-  const chordsEqual = (a, b) => {
-    if (a === b) return true;
-    if (a == null || b == null) return false;
-    if (a.length != b.length) return false;
-    a.sort();
-    b.sort();
-    for (var i = 0; i < a.length; ++i) {
-      if (a[i] !== b[i]) return false;
+  // FIXME: fix typing here. unsure what type to use for chords
+  const chordsEqual = (a: any, b: any) => {
+    if (a === b) return true
+    if (a == null || b == null) return false
+    if (a.length != b.length) return false
+    a.sort()
+    b.sort()
+    for (let i = 0; i < a.length; ++i) {
+      if (a[i] !== b[i]) return false
     }
-    return true;
-  };
+    return true
+  }
 
-  // m: array of chords (i.e., array of keys)
-  // t: major or minor
-  const listChords = (m, t) => {
-    $(`.${t}chords`).html(`<th>${capitalize(t)}</th>`);
-    m.forEach(c => {
-      $(`.${t}chords`).append(`<td class="chord ${c}">${c}</td>`);
-    });
-  };
+  const listChords = ({
+    chords,
+    type,
+  }: {
+    chords: string[]
+    type: "major" | "minor"
+  }): void => {
+    $(`.${type}chords`).html(`<th>${capitalize(type)}</th>`)
+    chords.forEach((chord) => {
+      $(`.${type}chords`).append(`<td class="chord ${chord}">${chord}</td>`)
+    })
+  }
 
   // m: array of chords (i.e., array of keys)
   const highlightChords = (m: KeyId[]) => {
-    m.forEach(c => {
-      let n = Chord.notes(c);
-      if (chordsEqual(n, keys.map(k => k.substring(0, k.length - 1)))) {
-        $(`.chord.${c}`).addClass('highlight');
+    m.forEach((c) => {
+      const notes = Chord.get(c).notes
+
+      console.log(notes)
+      if (
+        chordsEqual(
+          notes,
+          notes.map((k) => k.substring(0, k.length - 1))
+        )
+      ) {
+        $(`.chord.${c}`).addClass("highlight")
       }
-    });
-  };
+    })
+  }
 
   // format number of flats/ sharps in a given key signature
-  const accidentalText = (s, t) => {
-    let count = s[`${t}s`];
-    if (count === 0) return "";
-    return `(${count} ${t}${count > 1 ? 's' : ''})`;
-  };
+  const accidentalText = ({
+    signature,
+    type,
+  }: {
+    signature: Signature
+    type: keyof Signature
+  }): string => {
+    const count = signature[type] as number
+    return count === 0
+      ? ""
+      : `(${count} ${type.replace(/s$/, "")}${count > 1 ? "s" : ""})`
+  }
 
-  // TODO: disambiguate "keys" (notes) from keySignatures
-  const renderStave = ({ keys, signature }: { keys: KeyId[], signature: Signature }) => {
+  //TODO: disambiguate "keys" (notes) from keySignatures
+  const renderStave = ({
+    keys,
+    signature,
+  }: {
+    keys: KeyId[]
+    signature: Signature
+  }) => {
     // create a stave of width 400 at position 10, 40 on the canvas.
-    const topStaff = new VF.Stave(30, 40, 130);
-    const bottomStaff = new VF.Stave(30, 100, 130);
+    const topStaff = new VF.Stave(30, 40, 130)
+    const bottomStaff = new VF.Stave(30, 100, 130)
 
-    const brace = new Vex.Flow.StaveConnector(topStaff, bottomStaff).setType(3);
-    const lineRight = new Vex.Flow.StaveConnector(topStaff, bottomStaff).setType(6);
-    const lineLeft = new Vex.Flow.StaveConnector(topStaff, bottomStaff).setType(1);
+    const brace = new Vex.Flow.StaveConnector(topStaff, bottomStaff).setType(3)
+    const lineRight = new Vex.Flow.StaveConnector(
+      topStaff,
+      bottomStaff
+    ).setType(6)
+    const lineLeft = new Vex.Flow.StaveConnector(topStaff, bottomStaff).setType(
+      1
+    )
 
-    topStaff.addClef("treble");
-    bottomStaff.addClef("bass");
-    topStaff.addKeySignature(signature.id).addTimeSignature("4/4");
-    bottomStaff.addKeySignature(signature.id).addTimeSignature("4/4");
+    topStaff.addClef("treble")
+    bottomStaff.addClef("bass")
+    topStaff.addKeySignature(signature.id).addTimeSignature("4/4")
+    bottomStaff.addKeySignature(signature.id).addTimeSignature("4/4")
 
+    //   // FIXME: typings
     const notes = {
-      notesTreble: [],
-      notesBass: []
-    };
-
-    let noteTreble = new VF.StaveNote({ keys: ["b/4"], duration: "qr" });
-    let noteBass = new VF.StaveNote({ keys: ["b/4"], duration: "qr" });
-    if (keys.length !== 0) {
-      noteTreble = new VF.StaveNote({ clef: "treble", keys, duration: "q" });
-      noteBass = new VF.StaveNote({ clef: "bass", keys, duration: "q" });
+      notesTreble: [] as any[],
+      notesBass: [] as any[],
     }
 
-    const flats = keys.map(k => hasAccidental(k, "b"));
-    const sharps = keys.map(k => hasAccidental(k, "#"));
+    let noteTreble = new VF.StaveNote({ keys: ["b/4"], duration: "qr" })
+    let noteBass = new VF.StaveNote({ keys: ["b/4"], duration: "qr" })
 
-    const alteredNotes = Key.alteredNotes(`${signature.id} major`).map(n => n.toLowerCase());
+    if (keys.length !== 0) {
+      noteTreble = new VF.StaveNote({ clef: "treble", keys, duration: "q" })
+      noteBass = new VF.StaveNote({ clef: "bass", keys, duration: "q" })
+    }
 
+    const flats = keys.map((k) => hasAccidental(k, "b"))
+    const sharps = keys.map((k) => hasAccidental(k, "#"))
+
+    const alteredNotes = Key.majorKey(`${signature.id}`).scale.map((n) =>
+      n.toLowerCase()
+    )
+
+    // FIXME: Currently broken
     keys.forEach((k, i) => {
+      console.log(k)
       if (!alteredNotes.includes(k.substring(0, 2))) {
         if (flats[i]) {
-          noteTreble.addAccidental(i, new Vex.Flow.Accidental("b"));
-          noteBass.addAccidental(i, new Vex.Flow.Accidental("b"));
+          noteTreble.addModifier(new Vex.Flow.Accidental("b"), i)
+          noteBass.addModifier(new Vex.Flow.Accidental("b"), i)
         }
         if (sharps[i]) {
-          noteTreble.addAccidental(i, new Vex.Flow.Accidental("#"));
-          noteBass.addAccidental(i, new Vex.Flow.Accidental("#"));
+          noteTreble.addModifier(new Vex.Flow.Accidental("#"), i)
+          noteBass.addModifier(new Vex.Flow.Accidental("#"), i)
         }
       }
 
       if (isNatural(k, alteredNotes)) {
-        noteTreble.addAccidental(i, new Vex.Flow.Accidental("n"));
-        noteBass.addAccidental(i, new Vex.Flow.Accidental("n"));
+        console.log("natural")
+        noteTreble.addModifier(new Vex.Flow.Accidental("n"), i)
+        noteBass.addModifier(new Vex.Flow.Accidental("n"), i)
       }
-    });
+    })
 
-    notes.notesTreble.unshift(noteTreble);
-    notes.notesBass.unshift(noteBass);
+    notes.notesTreble.unshift(noteTreble)
+    notes.notesBass.unshift(noteBass)
 
-    let voiceTreble = new VF.Voice({
+    const voiceTreble = new VF.Voice({
       num_beats: 1,
       beat_value: 4,
-      resolution: Vex.Flow.RESOLUTION
-    }).addTickables(notes.notesTreble);
-    let voiceBass = new VF.Voice({
+      resolution: Vex.Flow.RESOLUTION,
+    }).addTickables(notes.notesTreble)
+
+    const voiceBass = new VF.Voice({
       num_beats: 1,
       beat_value: 4,
-      resolution: Vex.Flow.RESOLUTION
-    }).addTickables(notes.notesBass);
+      resolution: Vex.Flow.RESOLUTION,
+    }).addTickables(notes.notesBass)
 
-    let formatter = new VF.Formatter()
+    new VF.Formatter()
       .joinVoices([voiceTreble])
       .format([voiceTreble], 400)
       .joinVoices([voiceBass])
-      .format([voiceBass], 400);
+      .format([voiceBass], 400)
 
-    context.clear();
-    topStaff.setContext(context).draw();
-    brace.setContext(context).draw();
-    lineRight.setContext(context).draw();
-    lineLeft.setContext(context).draw();
-    bottomStaff.setContext(context).draw();
+    context.clear()
+    topStaff.setContext(context).draw()
+    brace.setContext(context).draw()
+    lineRight.setContext(context).draw()
+    lineLeft.setContext(context).draw()
+    bottomStaff.setContext(context).draw()
 
-    voiceTreble.draw(context, topStaff);
-    voiceBass.draw(context, bottomStaff);
-  };
+    voiceTreble.draw(context, topStaff)
+    voiceBass.draw(context, bottomStaff)
+  }
 
   const mutateKeySignature = () => {
-    signature = findSignature($("#signature").val());
+    signature = findSignature({ id: $("#signature").val() as string })
+    ;[majorChords, minorChords] = [
+      Key.majorKey(`${signature.major}`).chords as string[],
+      Key.minorKey(`${signature.minor}`).natural.chords as string[],
+    ]
 
-    [majorChords, minorChords] = [
-      Key.chords(`${signature.major} major`),
-      Key.chords(`${signature.minor} minor`)
-    ];
+    listChords({ chords: majorChords, type: "major" })
+    listChords({ chords: minorChords, type: "minor" })
 
-    listChords(majorChords, "major");
-    listChords(minorChords, "minor");
+    renderStave({ keys: [], signature })
+  }
 
-    renderStave({ keys: [], signature });
-  };
-
-  signatures.forEach(s => {
+  signatures.forEach((signature) => {
     $("#signature").append(
-      `<option value="${s.id}">${s.major} major / ${
-        s.minor
-      } minor ${accidentalText(s, "sharp") ||
-        accidentalText(s, "flat")}</option>`
-    );
-  });
+      `<option value="${signature.id}">${signature.major} major / ${
+        signature.minor
+      } minor ${
+        accidentalText({ signature, type: "sharps" }) ||
+        accidentalText({ signature, type: "flats" })
+      }</option>`
+    )
+  })
 
-  $("#signature").on("change", function() {
-    mutateKeySignature();
-  });
+  $("#signature").on("change", function () {
+    mutateKeySignature()
+  })
 
-  mutateKeySignature();
+  mutateKeySignature()
 
-  const highlightPianoKeys = (keys: KeyId[]) => {
-    $(".keys .key").removeClass("pressed");
-    keys.forEach(k => {
-      $(`*[data-keyno="${Note.midi(k)}"]`).addClass("pressed");
-    });
-  };
+  const highlightPianoKeys = (keys: number[]) => {
+    $(".keys .key").removeClass("pressed")
+    keys.forEach((k) => {
+      $(`*[data-keyno="${k}"]`).addClass("pressed")
+    })
+  }
 
-  const handler = e => {
-    const currentKey = Note.fromMidi(e.getNote(), signature.sharps > 1);
+  const noteEventHandler = ({ event }: { event: NoteMessageEvent }) => {
+    const eventNote = event.note
 
-    if ((e.isNoteOn() && e.getVelocity() > 0) && typeof currentKey !== "undefined") {
-      if (!(currentKey in keys)) {
-        keys.push(currentKey);
+    if (event.type === "noteon" && event.rawValue > 0) {
+      if (!notes.some((note) => note.number === eventNote.number)) {
+        notes.push(eventNote)
       }
-    } else if ((e.isNoteOn() && e.getVelocity() == 0) || e.isNoteOff()) {
-      keys.splice(keys.indexOf(currentKey), 1);
+    } else if (
+      (event.type === "noteon" && event.rawValue == 0) ||
+      event.type === "noteoff"
+    ) {
+      notes = notes.filter((note) => note.number !== eventNote.number)
     }
 
-    $(".chord").removeClass("highlight");
-    highlightChords(majorChords);
-    highlightChords(minorChords);
-    highlightPianoKeys(keys);
+    $(".chord").removeClass("highlight")
+
+    highlightChords(majorChords)
+    highlightChords(minorChords)
+    highlightPianoKeys(notes.map((note) => note.number))
 
     renderStave({
-      keys: Array.sort(keys).map(
-        k =>
-          `${k.substring(0, k.search(/\d/)).toLowerCase()}/${k.substring(
-            k.search(/\d/),
-            k.length
-          )}`
+      keys: notes.map(
+        (eventNote) =>
+          // Format notes for VF
+          `${eventNote.name}${eventNote.accidental || ""}/${eventNote.octave}`
       ),
-      signature
-    });
-  };
+      signature,
+    })
+  }
 
-  buildKeyboard(".keys", 7, "black", 24);
-  centerPiano("#piano", 84, 36);
-});
+  buildKeyboard({
+    selector: ".keys",
+    octaveCount: 7,
+    modifier: "black",
+    initialKey: 24,
+  })
+
+  centerPiano({
+    selector: "#piano",
+    totalWidth: 84,
+    currentPosition: 36,
+  })
+})
