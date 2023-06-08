@@ -1,1 +1,34 @@
+# Logs
+logs/
+*.log
+
+# Dependency directories
 node_modules/
+
+# Build output
+dist/
+
+# macOS specific files
+.DS_Store
+
+# Editor directories and files
+.vscode/
+.idea/
+*.iml
+
+# Windows thumbnail cache files
+Thumbs.db
+
+# Compiled TypeScript files
+*.js
+*.js.map
+*.d.ts
+
+# Compiled CSS files
+*.css
+
+# Environment configuration files
+.env
+
+# Ignore .eslintcache folder if it exists
+.eslintcache/
