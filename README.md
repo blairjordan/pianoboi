@@ -3,7 +3,7 @@
 When I first created pianoboi, building a real-time MIDI app meant using Electron or native tools.
 But browser support has come a long way - thanks to the Web MIDI and Web Audio APIs, this now runs entirely in the browser.
 
-**→ Try it now at [pianoboi.site](https://pianoboi.site)**
+**→ Try it now at [pianoboi.space](https://pianoboi.space)**
 
 ---
 
